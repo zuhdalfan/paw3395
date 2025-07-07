@@ -1,0 +1,15 @@
+description: |
+  Sensor driver for the pixart PAW3395 optical mouse sensor 
+
+compatible: "pixart,paw3395"
+
+include: spi-device.yaml
+
+properties:
+  label:
+    type: string
+  irq-gpios:
+    type: phandle-array
+  scroll-layer:
+    type: int
+    description: the momentary layer used to modifiy move to scroll

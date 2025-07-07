@@ -1,0 +1,5 @@
+menuconfig PAW3395
+    bool "PixArt PAW3395 optical sensor support"
+    default n
+    help
+      Enable driver for PixArt PAW3395 SPI optical sensor.
