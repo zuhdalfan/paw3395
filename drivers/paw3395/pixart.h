@@ -38,7 +38,6 @@ struct pixart_data {
 struct pixart_config {
     struct gpio_dt_spec irq_gpio;
     struct spi_dt_spec bus;
-    struct gpio_dt_spec cs_gpio;
 };
 
 #ifdef __cplusplus

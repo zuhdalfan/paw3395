@@ -1,2 +1,2 @@
 # <module>/Kconfig
-source "drivers/Kconfig"
+rsource "drivers/Kconfig"

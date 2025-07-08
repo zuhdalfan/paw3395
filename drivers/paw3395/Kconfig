@@ -5,3 +5,7 @@ config PAW3395
     depends on SPI
     help
       Enable support for the PixArt BUTTON123 optical sensor.
+
+config PAW3395_INIT_PRIORITY
+    int "Init priority for PAW3395"
+    default 70

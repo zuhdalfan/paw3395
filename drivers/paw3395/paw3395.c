@@ -23,7 +23,7 @@
 #include "pixart.h"
 #include "paw3395_priv.h"
 
-LOG_MODULE_REGISTER(paw3395, CONFIG_PAW3395_LOG_LEVEL);
+LOG_MODULE_REGISTER(paw3395);
 
 #define PAW3395_REG_PRODUCT_ID 0x00
 #define PAW3395_REG_POWER_UP_RESET 0x3A
@@ -55,6 +55,10 @@ LOG_MODULE_REGISTER(paw3395, CONFIG_PAW3395_LOG_LEVEL);
 static const uint32_t paw3395_cpi_choices[] = {
     800, 1600, 2400, 3200, 5000, 10000, 26000
 };
+
+// In pixart.h or paw3395.h
+#define paw3395_config pixart_config
+
 
 struct paw3395_data {
     struct pixart_data base;
@@ -219,7 +223,10 @@ static int paw3395_set_power_saving(const struct device *dev) {
     err |= paw3395_set_rest_period(dev, 1, 5);
 
     // get all rest periods to calculate downshift values
-    uint16_t rest1_period_ms, rest2_period_ms, rest3_period_ms;
+    uint16_t rest1_period_ms = 1;
+    uint16_t rest2_period_ms = 1;
+    uint16_t rest3_period_ms = 1;
+
     err |= paw3395_get_rest_period(dev, 1, &rest1_period_ms);
     err |= paw3395_get_rest_period(dev, 2, &rest2_period_ms);
     err |= paw3395_get_rest_period(dev, 3, &rest3_period_ms);
@@ -343,10 +350,6 @@ static int paw3395_init(const struct device *dev) {
     gpio_init_callback(&data->base.irq_gpio_cb, paw3395_irq_callback, BIT(cfg->irq_gpio.pin));
     // Drive NCS high, and then low to reset the SPI port.
     k_msleep(50);
-    err = gpio_pin_configure_dt(&cfg->cs_gpio, GPIO_OUTPUT_INACTIVE);
-    if (err) return err;
-    err = gpio_pin_set_dt(&cfg->cs_gpio, 1);
-    if (err) return err;
     // Power-up reset
     k_msleep(5);
     paw3395_spi_write(dev, PAW3395_REG_POWER_UP_RESET, 0x5A);
@@ -415,27 +418,20 @@ static const struct sensor_driver_api paw3395_api = {
 
 // Expansion macro to define driver instances
 #define PAW3395_DEFINE(inst)                                                 \
-    /* Create an instance of the config struct, populated with DT values */ \
-    static const struct paw3395_config paw3395_config_##inst = {            \
-        .bus = SPI_DT_SPEC_GET(                                             \
-            DT_INST(inst, pixart_paw3395), SPI_OP_MODE_MASTER, 0),         \
-        .cs_gpio = GPIO_DT_SPEC_GET(                                        \
-            DT_INST(inst, pixart_paw3395), cs_gpios),                       \
-        .irq_gpio = GPIO_DT_SPEC_GET(                                       \
-            DT_INST(inst, pixart_paw3395), irq_gpios)                       \
-    };                                                                      \
-                                                                            \
-    /* Define the runtime data structure */                                 \
-    static struct paw3395_data paw3395_data_##inst;                         \
-                                                                            \
-    /* Register the device with the system */                               \
-    DEVICE_DT_INST_DEFINE(inst,                                             \
-                          paw3395_init,                                     \
-                          NULL,                                             \
-                          &paw3395_data_##inst,                             \
-                          &paw3395_config_##inst,                           \
-                          POST_KERNEL,                                      \
-                          CONFIG_PAW3395_INIT_PRIORITY,                     \
+    static const struct pixart_config paw3395_config_##inst = {             \
+        .bus = SPI_DT_SPEC_INST_GET(inst, SPI_OP_MODE_MASTER, 0),           \
+        .irq_gpio = GPIO_DT_SPEC_INST_GET(inst, irq_gpios),                 \
+    };                                                                       \
+                                                                             \
+    static struct paw3395_data paw3395_data_##inst;                          \
+                                                                             \
+    DEVICE_DT_INST_DEFINE(inst,                                              \
+                          paw3395_init,                                      \
+                          NULL,                                              \
+                          &paw3395_data_##inst,                              \
+                          &paw3395_config_##inst,                            \
+                          POST_KERNEL,                                       \
+                          CONFIG_PAW3395_INIT_PRIORITY,                      \
                           &paw3395_api);
 
 // Instantiate for all devices in the Devicetree with compatible = "pixart,paw3395"
