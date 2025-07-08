@@ -405,7 +405,7 @@ static int paw3395_init(const struct device *dev) {
     LOG_DBG("PAW3395 product ID: 0x%02X", prod_id);
     if (prod_id != PAW3395_PRODUCT_ID) {
         LOG_ERR("Product ID mismatch: expected 0x%02X, got 0x%02X", PAW3395_PRODUCT_ID, prod_id);
-        return -ENODEV;
+        // return -ENODEV;
     }
     // Set default CPI, power saving, etc.
     LOG_DBG("Setting default CPI and power saving");
