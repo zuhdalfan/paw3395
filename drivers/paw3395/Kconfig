@@ -1,0 +1,7 @@
+# <module>/drivers/paw3395/Kconfig
+config PAW3395
+    bool "PixArt PAW3395 Optical Sensor"
+    default n
+    depends on SPI
+    help
+      Enable support for the PixArt BUTTON123 optical sensor.

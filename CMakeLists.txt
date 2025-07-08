@@ -1,8 +1,5 @@
-zephyr_library()
+# Include the required subdirectories
+add_subdirectory(drivers)
 
-zephyr_library_sources_ifdef(CONFIG_PAW3395 
-    src/paw3395.c
-    src/paw3395_priv.c)
-
-zephyr_include_directories(
-    include)
+# Add subdirectories to the compiler's include search path (.h files)
+zephyr_include_directories(drivers)

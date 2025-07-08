@@ -9,6 +9,7 @@
  * - Motion burst read
  * - No LED or unrelated peripheral code
  */
+#define DT_DRV_COMPAT pixart_paw3395
 
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
@@ -411,15 +412,34 @@ static const struct sensor_driver_api paw3395_api = {
     .trigger_set = paw3395_trigger_set,
 };
 
-#define PAW3395_DEFINE(inst) \
-    static struct paw3395_data paw3395_data_##inst; \
-    static const struct pixart_config paw3395_config_##inst = { \
-        .irq_gpio = GPIO_DT_SPEC_INST_GET(inst, irq_gpios), \
-        .bus = SPI_DT_SPEC_INST_GET(inst, SPI_WORD_SET(8) | SPI_TRANSFER_MSB | SPI_MODE_CPOL | SPI_MODE_CPHA, 2*1000*1000), \
-        .cs_gpio = SPI_CS_GPIOS_DT_SPEC_GET(inst), \
-    }; \
-    DEVICE_DT_INST_DEFINE(inst, paw3395_init, NULL, \
-        &paw3395_data_##inst, &paw3395_config_##inst, \
-        POST_KERNEL, CONFIG_SENSOR_INIT_PRIORITY, &paw3395_api);
 
+// Expansion macro to define driver instances
+#define PAW3395_DEFINE(inst)                                                 \
+    /* Create an instance of the config struct, populated with DT values */ \
+    static const struct paw3395_config paw3395_config_##inst = {            \
+        .bus = SPI_DT_SPEC_GET(                                             \
+            DT_INST(inst, pixart_paw3395), SPI_OP_MODE_MASTER, 0),         \
+        .cs_gpio = GPIO_DT_SPEC_GET(                                        \
+            DT_INST(inst, pixart_paw3395), cs_gpios),                       \
+        .irq_gpio = GPIO_DT_SPEC_GET(                                       \
+            DT_INST(inst, pixart_paw3395), irq_gpios)                       \
+    };                                                                      \
+                                                                            \
+    /* Define the runtime data structure */                                 \
+    static struct paw3395_data paw3395_data_##inst;                         \
+                                                                            \
+    /* Register the device with the system */                               \
+    DEVICE_DT_INST_DEFINE(inst,                                             \
+                          paw3395_init,                                     \
+                          NULL,                                             \
+                          &paw3395_data_##inst,                             \
+                          &paw3395_config_##inst,                           \
+                          POST_KERNEL,                                      \
+                          CONFIG_PAW3395_INIT_PRIORITY,                     \
+                          &paw3395_api);
+
+// Instantiate for all devices in the Devicetree with compatible = "pixart,paw3395"
 DT_INST_FOREACH_STATUS_OKAY(PAW3395_DEFINE)
+
+
+
