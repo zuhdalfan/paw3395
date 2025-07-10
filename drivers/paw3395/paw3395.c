@@ -301,6 +301,8 @@ static int paw3395_attr_set(const struct device *dev, enum sensor_channel chan, 
             return paw3395_set_cpi(dev, val->val1, true);
         case PAW3395_ATTR_Y_CPI:
             return paw3395_set_cpi(dev, val->val1, false);
+        case PAW3395_ATTR_CPI_ALL:
+            return paw3395_set_cpi_all(dev, (paw3395_cpi_enum_t)val->val1);
         case PAW3395_ATTR_REST1_DOWNSHIFT_TIME:
             return paw3395_spi_write(dev, PAW3395_REG_REST1_DOWNSHIFT, val->val1 / 1000);
         case PAW3395_ATTR_REST2_DOWNSHIFT_TIME:
