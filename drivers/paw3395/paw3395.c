@@ -433,7 +433,7 @@ static const struct sensor_driver_api paw3395_api = {
     .trigger_set = paw3395_trigger_set,
 };
 
-const struct device *paw3395_get_device()
+struct device *paw3395_get_device()
 {
     return paw3395;
 }
