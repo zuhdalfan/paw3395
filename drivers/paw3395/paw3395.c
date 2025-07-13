@@ -42,8 +42,9 @@ LOG_MODULE_REGISTER(paw3395);
 #define PAW3395_PRODUCT_ID 0x51
 #define SPI_WRITE_BIT 0x80
 #define PAW3395_BURST_SIZE 6
-#define PAW3395_DX_POS 2
-#define PAW3395_DY_POS 4
+#define PAW3395_MOTION 0 // motion byte
+#define PAW3395_DX_POS 2 // dx byte
+#define PAW3395_DY_POS 4 // dx byte
 
 #define CPI_TO_REG(cpi) (((cpi) / 50) - 1)
 
@@ -58,7 +59,6 @@ static const uint32_t paw3395_cpi_choices[] = {
 
 // In pixart.h or paw3395.h
 #define paw3395_config pixart_config
-
 
 struct paw3395_data {
     struct pixart_data base;
@@ -271,8 +271,14 @@ static int paw3395_sample_fetch(const struct device *dev, enum sensor_channel ch
     if (!data->ready) return -EBUSY;
     int err = paw3395_motion_burst(dev, buf, sizeof(buf));
     if (err) return err;
-    data->x = (int16_t)sys_get_le16(&buf[PAW3395_DX_POS]);
-    data->y = (int16_t)sys_get_le16(&buf[PAW3395_DY_POS]);
+    // check if motion byte 1, if 0 then set the dx and dx into 0
+    if (buf[PAW3395_MOTION] == 0x01){
+        data->x = (int16_t)sys_get_le16(&buf[PAW3395_DX_POS]);
+        data->y = (int16_t)sys_get_le16(&buf[PAW3395_DY_POS]);
+    }else{
+        data->x = 0;
+        data->y = 0;
+    }
     return 0;
 }
 
