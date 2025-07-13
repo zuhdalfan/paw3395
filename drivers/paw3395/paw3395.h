@@ -47,6 +47,7 @@ typedef enum {
     PAW3395_CPI_COUNT
 } paw3395_cpi_enum_t;
 
+const struct device *paw3395_get_device();
 
 #ifdef __cplusplus
 }

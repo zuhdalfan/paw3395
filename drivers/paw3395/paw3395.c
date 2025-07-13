@@ -60,6 +60,8 @@ static const uint32_t paw3395_cpi_choices[] = {
 // In pixart.h or paw3395.h
 #define paw3395_config pixart_config
 
+const struct device *paw3395 = DEVICE_DT_GET_ONE(pixart_paw3395);
+
 struct paw3395_data {
     struct pixart_data base;
     int16_t x;
@@ -431,6 +433,10 @@ static const struct sensor_driver_api paw3395_api = {
     .trigger_set = paw3395_trigger_set,
 };
 
+const struct device *paw3395_get_device()
+{
+    return paw3395;
+}
 
 // Expansion macro to define driver instances
 #define PAW3395_DEFINE(inst)                                                 \
