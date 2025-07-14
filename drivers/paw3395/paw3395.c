@@ -271,14 +271,10 @@ static int paw3395_sample_fetch(const struct device *dev, enum sensor_channel ch
     if (!data->ready) return -EBUSY;
     int err = paw3395_motion_burst(dev, buf, sizeof(buf));
     if (err) return err;
-    // check if motion byte 1, if 0 then set the dx and dx into 0
-    if (buf[PAW3395_MOTION] == 0x01){
-        data->x = (int16_t)sys_get_le16(&buf[PAW3395_DX_POS]);
-        data->y = (int16_t)sys_get_le16(&buf[PAW3395_DY_POS]);
-    }else{
-        data->x = 0;
-        data->y = 0;
-    }
+    
+    data->x = (int16_t)sys_get_le16(&buf[PAW3395_DX_POS]);
+    data->y = (int16_t)sys_get_le16(&buf[PAW3395_DY_POS]);
+    
     return 0;
 }
 
